@@ -3,18 +3,34 @@ package cmd
 import (
 	"fmt"
 	"github.com/geniusmonkey.com/jump/config"
+	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
 	"os/exec"
+	"sort"
 )
 
+var interactive bool
 var connectCmd = &cobra.Command{
 	Use:   "connect [remote] <tunnel>",
 	Short: "connects to a remote and open a tunnel",
-	Args:  cobra.RangeArgs(1, 2),
+	Args: func(cmd *cobra.Command, args []string) error {
+		if interactive {
+			return nil
+		} else {
+			return cobra.RangeArgs(1, 2)(cmd, args)
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg, err := config.Read(config.Location)
+		if interactive {
+			remote := getRemoteInteractive(cfg)
+			tunnel := getTunnelInteractive(cfg)
+			args = []string{remote, tunnel}
+
+		}
+
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -59,6 +75,44 @@ var connectCmd = &cobra.Command{
 	},
 }
 
+func getTunnelInteractive(cfg config.Config) string {
+	names := make([]string, 0)
+	for name := range cfg.Tunnels {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	prompt := promptui.Select{
+		Label: "Tunnel",
+		Items: names,
+	}
+	_, tunnel, err := prompt.Run()
+	if err != nil {
+		log.Fatalf("failed to select tunnel, %v", err)
+	}
+	return tunnel
+}
+
+func getRemoteInteractive(cfg config.Config) string {
+	names := make([]string, 0)
+	for name := range cfg.Remotes {
+		names = append(names, name)
+	}
+
+	sort.Strings(names)
+
+	prompt := promptui.Select{
+		Label: "Remote",
+		Items: names,
+	}
+	_, remote, err := prompt.Run()
+	if err != nil {
+		log.Fatalf("failed to select remote, %v", err)
+	}
+	return remote
+}
+
 func init() {
+	connectCmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "will list options for remotes and tunnels")
 	rootCmd.AddCommand(connectCmd)
 }
