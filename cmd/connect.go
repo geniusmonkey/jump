@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/geniusmonkey.com/jump/config"
+	"github.com/geniusmonkey/jump/config"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"log"

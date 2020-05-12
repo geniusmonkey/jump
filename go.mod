@@ -1,4 +1,4 @@
-module github.com/geniusmonkey.com/jump
+module github.com/geniusmonkey/jump
 
 require (
 	github.com/BurntSushi/toml v0.3.1

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/geniusmonkey.com/jump/config"
+	"github.com/geniusmonkey/jump/config"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"strconv"
